@@ -53,12 +53,14 @@ sub outputRunDetails{
         /)
     ) . "\n" ;
     foreach my $k (sort keys %$samp){
-        my $r_url = "http://www.ebi.ac.uk/ena/data/view/" 
-                    . $samp->{$k} 
-                    . "&display=xml&download=xml" ;
-        my $xml = restQuery($r_url);
-        if (my @details = parseRunXml($xml)){
-            print $DETAILS join("\t", $samp->{$k}, $k, @details) . "\n";
+        foreach my $run (@{$samp->{$k}}){
+            my $r_url = "http://www.ebi.ac.uk/ena/data/view/" 
+                        . $run 
+                        . "&display=xml&download=xml" ;
+            my $xml = restQuery($r_url);
+            if (my @details = parseRunXml($xml)){
+                print $DETAILS join("\t", $run, $k, @details) . "\n";
+            }
         }
     }
     close $DETAILS
@@ -120,7 +122,7 @@ sub getSamplesAndFiles{
     }
     foreach my $line (@lines){
         my @split = split("\t", $line);
-        $samp_to_run{$split[$tabcol{sample_accession}]} = 
+        push @{$samp_to_run{$split[$tabcol{sample_accession}]}}, 
           $split[$tabcol{run_accession}];
     }
     return %samp_to_run;
